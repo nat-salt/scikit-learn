@@ -93,10 +93,19 @@ Changelog
   produce the same models, but are deprecated and will be removed in version
   1.3.
 
-  - For :class:`ensemble.GradientBoostingClassifier`, The `loss` parameter name
+  - For :class:`ensemble.GradientBoostingClassifier`, the `loss` parameter name
     "deviance" is deprecated in favor of the new name "log_loss", which is now the
     default.
     :pr:`23036` by :user:`Christian Lorentzen <lorentzenchr>`.
+
+  - For :class:`ensemble.HistGradientBoostingClassifier`, the `loss` parameter names
+    "auto", "binary_crossentropy" and "categorical_crossentropy" are deprecated in
+    favor of the new name "log_loss", which is now the default.
+    :pr:`23040` by :user:`Christian Lorentzen <lorentzenchr>`.
+
+  - For :class:`linear_model.SGDClassifier`, the `loss` parameter name
+    "log" is deprecated in favor of the new name "log_loss".
+    :pr:`23046` by :user:`Christian Lorentzen <lorentzenchr>`.
 
 - |Efficiency| Low-level routines for reductions on pairwise distances
   for dense float64 datasets have been refactored. The following functions
@@ -465,6 +474,9 @@ Changelog
 :mod:`sklearn.feature_extraction`
 .................................
 
+- |Feature| :class:`feature_extraction.FeatureHasher` now supports PyPy.
+  :pr:`23023` by `Thomas Fan`_.
+
 - |Fix| :class:`feature_extraction.FeatureHasher` now validates input parameters
   in `transform` instead of `__init__`. :pr:`21573` by
   :user:`Hannah Bohle <hhnnhh>` and :user:`Maren Westermann <marenwestermann>`.
@@ -550,20 +562,6 @@ Changelog
   values in the training set.
   :pr:`21617` by :user:`Christian Ritter <chritter>`.
 
-- |Enhancement| :class:`linear_model.RidgeClassifier` is now supporting
-  multilabel classification.
-  :pr:`19689` by :user:`Guillaume Lemaitre <glemaitre>`.
-
-- |Enhancement| :class:`linear_model.RidgeCV` and
-  :class:`linear_model.RidgeClassifierCV` now raise consistent error message
-  when passed invalid values for `alphas`.
-  :pr:`21606` by :user:`Arturo Amor <ArturoAmorQ>`.
-
-- |Enhancement| :class:`linear_model.Ridge` and :class:`linear_model.RidgeClassifier`
-  now raise consistent error message when passed invalid values for `alpha`,
-  `max_iter` and `tol`.
-  :pr:`21341` by :user:`Arturo Amor <ArturoAmorQ>`.
-
 :mod:`sklearn.inspection`
 .........................
 
@@ -572,11 +570,18 @@ Changelog
   :pr:`16061` by `Thomas Fan`_.
 
 - |Enhancement| In
-  :meth:`~sklearn.inspection.PartialDependenceDisplay.from_estimator` and
-  :meth:`~sklearn.inspection.PartialDependenceDisplay.from_predictions`, allow
+  :meth:`inspection.PartialDependenceDisplay.from_estimator`, allow
   `kind` to accept a list of strings to specify  which type of
   plot to draw for each feature interaction.
   :pr:`19438` by :user:`Guillaume Lemaitre <glemaitre>`.
+
+- |Enhancement| :meth:`inspection.PartialDependenceDisplay.from_estimator`,
+  :meth:`inspection.PartialDependenceDisplay.plot`, and
+  :func:`inspection.plot_partial_dependence` now support plotting centered
+  Individual Conditional Expectation (cICE) and centered PDP curves controlled
+  by setting the parameter `centered`.
+  :pr:`18310` by :user:`Johannes Elfner <JoElfner>` and
+  :user:`Guillaume Lemaitre <glemaitre>`.
 
 :mod:`sklearn.isotonic`
 .......................
@@ -640,6 +645,10 @@ Changelog
   :pr:`21481` by :user:`Guillaume Lemaitre <glemaitre>` and
   :user:`Andrés Babino <ababino>`.
 
+- |Fix| :class:`linear_model.TheilSenRegressor` now validates input parameter
+  ``max_subpopulation`` in `fit` instead of `__init__`.
+  :pr:`21767` by :user:`Maren Westermann <marenwestermann>`.
+
 - |Enhancement| :func:`linear_model.ElasticNet` and
   and other linear model classes using coordinate descent show error
   messages when non-finite parameter weights are produced. :pr:`22148`
@@ -689,6 +698,20 @@ Changelog
   `fit_intercept=True`.
   :pr:`22950` by :user:`Christian Lorentzen <lorentzenchr>`.
 
+- |Enhancement| :class:`linear_model.RidgeClassifier` is now supporting
+  multilabel classification.
+  :pr:`19689` by :user:`Guillaume Lemaitre <glemaitre>`.
+
+- |Enhancement| :class:`linear_model.RidgeCV` and
+  :class:`linear_model.RidgeClassifierCV` now raise consistent error message
+  when passed invalid values for `alphas`.
+  :pr:`21606` by :user:`Arturo Amor <ArturoAmorQ>`.
+
+- |Enhancement| :class:`linear_model.Ridge` and :class:`linear_model.RidgeClassifier`
+  now raise consistent error message when passed invalid values for `alpha`,
+  `max_iter` and `tol`.
+  :pr:`21341` by :user:`Arturo Amor <ArturoAmorQ>`.
+
 :mod:`sklearn.manifold`
 .......................
 
@@ -714,6 +737,11 @@ Changelog
   :pr:`21805` by :user:`Jeanne Dionisi <jeannedionisi>` and :pr:`22685` by
   :user:`Meekail Zain <micky774>`.
 
+- |Enhancement| :func:`manifold.trustworthiness` raises an error if
+  `n_neighbours >= n_samples / 2` to ensure a correct support for the function.
+  :pr:`18832` by :user:`Hong Shao Yang <hongshaoyang>` and :pr:`23033` by
+  :user:`Meekail Zain <micky774>`.
+
 :mod:`sklearn.metrics`
 ......................
 
@@ -722,6 +750,14 @@ Changelog
   actual non-finite score in case of perfect predictions or constant `y_true`,
   instead of the finite approximation (`1.0` and `0.0` respectively) currently
   returned by default. :pr:`17266` by :user:`Sylvain Marié <smarie>`.
+
+- |Feature| :func:`d2_pinball_score` and :func:`d2_absolute_error_score`
+  calculate the :math:`D^2` regression score for the pinball loss and the
+  absolute error respectively. :func:`d2_absolute_error_score` is a special case
+  of :func:`d2_pinball_score` with a fixed quantile parameter `alpha=0.5`
+  for ease of use and discovery. The :math:`D^2` scores are generalizations
+  of the `r2_score` and can be interpeted as the fraction of deviance explained.
+  :pr:`22118` by :user:`Ohad Michel <ohadmich>`
 
 - |Enhancement| :func:`metrics.top_k_accuracy_score` raises an improved error
   message when `y_true` is binary and `y_score` is 2d. :pr:`22284` by `Thomas Fan`_.
@@ -801,6 +837,11 @@ Changelog
 - |Fix| :func:`model_selection.learning_curve` now supports `partial_fit`
   with regressors. :pr:`22982` by `Thomas Fan`_.
 
+- |Fix| :class:`mixture.GaussianMixture` now normalizes `weights_` more safely,
+  preventing rounding errors when calling :meth:`GaussianMixture.sample` with
+  `n_components=1`.
+  :pr:`23034` by :user:`Meekail Zain <micky774>`.
+
 :mod:`sklearn.multiclass`
 .........................
 
@@ -813,16 +854,6 @@ Changelog
 
 :mod:`sklearn.neighbors`
 ........................
-
-- |Enhancement| `utils.validation.check_array` and `utils.validation.type_of_target`
-  now accept an `input_name` parameter to make the error message more
-  informative when passed invalid input data (e.g. with NaN or infinite
-  values).
-  :pr:`21219` by :user:`Olivier Grisel <ogrisel>`.
-
-- |Enhancement| :func:`utils.validation.check_array` returns a float
-  ndarray with `np.nan` when passed a `Float32` or `Float64` pandas extension
-  array with `pd.NA`. :pr:`21278` by `Thomas Fan`_.
 
 - |Enhancement| Adds :term:`get_feature_names_out` to
   :class:`neighbors.RadiusNeighborsTransformer`, :class:`neighbors.KNeighborsTransformer`
@@ -973,6 +1004,16 @@ Changelog
 
 :mod:`sklearn.utils`
 ....................
+
+- |Enhancement| `utils.validation.check_array` and `utils.validation.type_of_target`
+  now accept an `input_name` parameter to make the error message more
+  informative when passed invalid input data (e.g. with NaN or infinite
+  values).
+  :pr:`21219` by :user:`Olivier Grisel <ogrisel>`.
+
+- |Enhancement| :func:`utils.validation.check_array` returns a float
+  ndarray with `np.nan` when passed a `Float32` or `Float64` pandas extension
+  array with `pd.NA`. :pr:`21278` by `Thomas Fan`_.
 
 - |Enhancement| :func:`utils.estimator_html_repr` shows a more helpful error
   message when running in a jupyter notebook that is not trusted. :pr:`21316`
